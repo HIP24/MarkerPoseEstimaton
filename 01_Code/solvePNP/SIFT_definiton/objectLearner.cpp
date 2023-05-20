@@ -1,8 +1,6 @@
-//#include <opencv2/opencv.hpp>	easy road - it will include everything but cost time
-//#include <opencv2/xfeatures2d/nonfree.hpp>
-//#include <vector>			
-//#include <opencv2/core.hpp>
 #include <iostream>
+#include <opencv2/calib3d.hpp>		// For chessboard corner detection
+
 #include <opencv2/imgproc.hpp>		// For line drawing
 #include <opencv2/features2d.hpp>	// For SIFT sruff
 #include <opencv2/highgui.hpp>		// For general cv
@@ -81,14 +79,30 @@ class ObjectLearner{
 	public:
 		// Constructor
 		ObjectLearner(){
-			cv::namedWindow("KeyPointimage", cv::WINDOW_NORMAL);
-		} 
+			//cv::namedWindow("KeyPointimage", cv::WINDOW_NORMAL);
+		}
 		// Destructor
 		~ObjectLearner(){}
+
+		void findChessboardCorners(const cv::Mat& input){
+			cv::Size patternsize(4,4); //interior number of corners
+			cv::Mat image_gray; //source image
+			objectImage = input.clone();
+			cv::cvtColor(objectImage, image_gray, CV_BGR2GRAY);	// Convert to Gray
+			//CALIB_CB_FAST_CHECK saves a lot of time on images
+			//that do not contain any chessboard corners
+			bool patternfound = cv::findChessboardCorners(image_gray, patternsize, corners,
+					cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE
+					+ cv::CALIB_CB_FAST_CHECK);
+			if(patternfound)
+			//cv::cornerSubPix(image_gray, corners, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+			imageoutput = objectImage.clone();
+			cv::drawChessboardCorners(imageoutput, patternsize, cv::Mat(corners), patternfound);
+		}
 		
 		// Getter
-		cv::Mat getImage() const{return imageout;}
-		void getoutput() const{
+		cv::Mat getImageout() const{return imageoutput;}
+		/*void getoutput() const{
 			cv::Mat resizeimageout = imageout.clone();
 			cv::imshow("KeyPointimage", resizeimageout);
 		}
@@ -249,10 +263,12 @@ class ObjectLearner{
 			myfile << "]";
 			myfile << "descriptors" << descriptors;
 			myfile.release();		
-		}
+		}*/
 		
 	private:
-		cv::Mat objectImage, imageout, imageoutoriginal, imageoutSIFTpicked, descriptors;
+		cv::Mat objectImage, imageoutput;
+		std::vector<cv::Point2f> corners;
+		/*cv::Mat objectImage, imageout, imageoutoriginal, imageoutSIFTpicked, descriptors;
 		std::vector<cv::KeyPoint> keypoints;
 		cv::Ptr<cv::SIFT> detector;
 		// For getting index
@@ -266,7 +282,7 @@ class ObjectLearner{
 		// Trackbar only works with integers - need workaround
 		int edgeThresholdint;
 		int contrastThresholdint;
-		int sigmaint;
+		int sigmaint;*/
 		
 };
 
@@ -279,11 +295,23 @@ int main(){
 	cv::Mat img1 = input.getImage();
 	cv::VideoCapture video1 = input.getVideo();
 	cv::Mat vidImg;
+	/*cv::imshow("Image", input.getImage());
+	cv::waitKey();
+	input.display();*/
 	ObjectLearner object;
+
+	object.findChessboardCorners(img1);
+	cv::Mat out = object.getImageout();
+	cv::resize(out, out, cv::Size(out.cols/2, out.rows/2));
+	cv::imshow("CheesboardCorner", out);
+	cv::waitKey();
+
 	// Create Trackbars for hyperparameters
-	object.createTrackbars();
+	//object.createTrackbars();
 	// Create Mouseclick function so i don't need to search for index manually
-	object.createMouseCallback();
+	//object.createMouseCallback();
+	
+
 	// SIFT for video so i can better define what "good" features are
 	/*key_t key;
 	while(key != 27){                   // Do till <ESC> was pressed
@@ -300,7 +328,7 @@ int main(){
     }*/
 	
 	// Picking SIFT features for farther use
-	object.SIFTdetectcompute(img1);
+	/*object.SIFTdetectcompute(img1);
 	std::cout << 
 	"################################################\n"
 	"# Pick Features by left-clicking on the image! #\n"
@@ -320,6 +348,6 @@ int main(){
 			object.getID();
 		}
 		object.getoutput();			// Print out SIFT image
-	}
+	}*/
 	return 0;
 }
