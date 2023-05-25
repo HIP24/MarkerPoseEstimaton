@@ -85,6 +85,7 @@ int main(){
 	cv::Mat vidImg, camera_matrix, distortion_coeffs, vidImgUndistort;
 	std::vector<cv::Point3f> activeSetXYZ;
 
+	// Open video input
 	video.open("data/video.mp4");
 	if (!video.isOpened()){
 		std::cerr << "Could not open video!" << std::endl;
