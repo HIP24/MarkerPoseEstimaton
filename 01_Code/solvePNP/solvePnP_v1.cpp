@@ -85,6 +85,7 @@ int main(){
 	cv::Mat vidImg, camera_matrix, distortion_coeffs, vidImgUndistort;
 	std::vector<cv::Point3f> activeSetXYZ;
 
+	// Open video input
 	video.open("data/video.mp4");
 	if (!video.isOpened()){
 		std::cerr << "Could not open video!" << std::endl;
@@ -112,6 +113,7 @@ int main(){
 
 	// Init poste Estimate
 	poseEstimate ePose(activeSetXYZ, camera_matrix, distortion_coeffs);
+
 	key_t key;
 	while(key != 27){                   // Do till <ESC> was pressed
         key = cv::waitKey(5);                  // Update window
@@ -127,16 +129,12 @@ int main(){
 		ePose.findChessboardCorners(vidImgUndistort);
 		cv::Mat out = ePose.getImageout();
 		// Resizing otherwise it would take too long to display every frame
-		std::vector<cv::Point2f> corners = ePose.getCornerXY();
-		cv::line(out,cv::Point_<int>(corners[53].x,corners[53].y),cv::Point_<int>(corners[51].x,corners[51].y),cv::Scalar(0,255,0),8);
-		cv::line(out,cv::Point_<int>(corners[53].x,corners[53].y),cv::Point_<int>(corners[35].x,corners[35].y),cv::Scalar(0,0,255),8);
 		cv::resize(out, out, cv::Size(out.cols/2, out.rows/2));
 		if(!ePose.getCornerXY().empty()){
 			ePose.calculateTransRot();
 			ePose.displayTransRot(out);
 		}
-		std::cout << "Corners: " << ePose.getCornerXY() << std::endl;
-		
+		//std::cout << "Corners: " << ePose.getCornerXY() << std::endl;
     }
 	return 0;
 }
