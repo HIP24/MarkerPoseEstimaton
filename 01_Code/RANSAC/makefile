@@ -2,9 +2,9 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++11
 LIBS = `pkg-config --cflags --libs opencv`
 
-SRC = RANSAC_opencv.cpp
+SRC = RANSAC_own.cpp
 
-TARGET = RANSAC_opencv
+TARGET = RANSAC_own
 
 all: $(TARGET)
 
