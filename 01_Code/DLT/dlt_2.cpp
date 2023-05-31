@@ -19,7 +19,7 @@ cv::Mat estimatePoseDLT(const std::vector<cv::Point2f>& imagePoints, const std::
 
     // Gleichungssystem aufstellen
     cv::Mat A(2 * imagePoints.size(), 12, CV_64F);
-    for (int i = 0; i < imagePoints.size(); i++)
+    for (size_t i = 0; i < imagePoints.size(); i++)
     {
         const cv::Point2f& imgPoint = imagePoints[i];
         const cv::Point3f& worldPoint = worldPoints[i];

@@ -5,9 +5,6 @@
 #include <opencv2/highgui.hpp>		// For general cv
 #include <fstream>					// For file stream csv
 #include <opencv2/calib3d.hpp>		// For solvePnP
-#include <opencv2/features2d.hpp>
-#include <opencv2/xfeatures2d/nonfree.hpp>
-#include <opencv2/opencv.hpp>
 
 class poseEstimate{
 	public:
