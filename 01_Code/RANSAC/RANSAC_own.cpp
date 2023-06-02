@@ -8,11 +8,11 @@
 #include <numeric>
 
 // Function to compute the homography using RANSAC
-cv::Mat findHomographyOwnRANSAC(const std::vector<cv::Point2f>& srcPoints,
-                             const std::vector<cv::Point2f>& dstPoints,
-                             int maxIterations = 1000,
-                             double distanceThreshold = 3.0,
-                             double confidence = 0.99)
+cv::Mat findHomographyOwnRANSAC(const std::vector<cv::Point2f> &srcPoints,
+                                const std::vector<cv::Point2f> &dstPoints,
+                                int maxIterations = 1000,
+                                double distanceThreshold = 3.0,
+                                double confidence = 0.99)
 {
     // Number of points
     int numPoints = srcPoints.size();
@@ -37,7 +37,32 @@ cv::Mat findHomographyOwnRANSAC(const std::vector<cv::Point2f>& srcPoints,
         std::vector<cv::Point2f> dstPointsSubset = {dstPoints[indices[0]], dstPoints[indices[1]], dstPoints[indices[2]], dstPoints[indices[3]]};
 
         // Compute the homography using the selected points
-        cv::Mat H = cv::getPerspectiveTransform(srcPointsSubset, dstPointsSubset);
+        cv::Mat A(8, 9, CV_64F);
+        for (int j = 0; j < 4; j++)
+        {
+            float X = srcPointsSubset[j].x;
+            float Y = srcPointsSubset[j].y;
+            float u = dstPointsSubset[j].x;
+            float v = dstPointsSubset[j].y;
+
+            A.at<double>(2 * j, 0) = -X;
+            A.at<double>(2 * j, 1) = -Y;
+            A.at<double>(2 * j, 2) = -1.0;
+            A.at<double>(2 * j, 6) = u * X;
+            A.at<double>(2 * j, 7) = u * Y;
+            A.at<double>(2 * j, 8) = u;
+
+            A.at<double>(2 * j + 1, 3) = -X;
+            A.at<double>(2 * j + 1, 4) = -Y;
+            A.at<double>(2 * j + 1, 5) = -1.0;
+            A.at<double>(2 * j + 1, 6) = v * X;
+            A.at<double>(2 * j + 1, 7) = v * Y;
+            A.at<double>(2 * j + 1, 8) = v;
+        }
+
+        cv::Mat U, D, Vt;
+        cv::SVDecomp(A, U, D, Vt, cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
+        cv::Mat H = Vt.row(Vt.rows - 1).reshape(0, 3);
 
         // Count the number of inliers
         int numInliers = 0;
@@ -129,7 +154,7 @@ int main()
 
     // Extract the matched keypoints for calculating the homography
     std::vector<cv::Point2f> matched_pts1, matched_pts2;
-    for (const cv::DMatch& match : matches)
+    for (const cv::DMatch &match : matches)
     {
         matched_pts1.push_back(keypoints1[match.queryIdx].pt);
         matched_pts2.push_back(keypoints2[match.trainIdx].pt);
