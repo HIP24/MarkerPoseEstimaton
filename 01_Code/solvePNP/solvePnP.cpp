@@ -32,9 +32,10 @@ class poseEstimate{
 			bool patternfound = cv::findChessboardCorners(image_gray, patternsize, corners,
 					cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE
 					+ cv::CALIB_CB_FAST_CHECK);
-			if(patternfound)
 			imageoutput = objectImage.clone();
-			cv::drawChessboardCorners(imageoutput, patternsize, cv::Mat(corners), patternfound);
+			if(patternfound){
+				cv::drawChessboardCorners(imageoutput, patternsize, cv::Mat(corners), patternfound);
+			}
 		}
 
 		void calculateTransRot(){
@@ -133,12 +134,15 @@ int main(){
 		cv::Mat out = ePose.getImageout();
 		// Resizing otherwise it would take too long to display every frame
 		std::vector<cv::Point2f> corners = ePose.getCornerXY();
-		cv::line(out,cv::Point_<int>(corners[53].x,corners[53].y),cv::Point_<int>(corners[51].x,corners[51].y),cv::Scalar(0,255,0),8);
-		cv::line(out,cv::Point_<int>(corners[53].x,corners[53].y),cv::Point_<int>(corners[35].x,corners[35].y),cv::Scalar(0,0,255),8);
+		//cv::line(out,cv::Point_<int>(corners[53].x,corners[53].y),cv::Point_<int>(corners[51].x,corners[51].y),cv::Scalar(0,255,0),8);
+		//cv::line(out,cv::Point_<int>(corners[53].x,corners[53].y),cv::Point_<int>(corners[35].x,corners[35].y),cv::Scalar(0,0,255),8);
 		cv::resize(out, out, cv::Size(out.cols/2, out.rows/2));
-		if(!ePose.getCornerXY().empty()){
+		
+		if(!ePose.getCornerXY().empty() && ePose.getActiveSetXYZ().size() == ePose.getCornerXY().size()){
 			ePose.calculateTransRot();
 			ePose.displayTransRot(out);
+		}else{
+			cv::imshow("CheesboardCorner", out);
 		}
 		//std::cout << "Corners: " << ePose.getCornerXY() << std::endl;
 		

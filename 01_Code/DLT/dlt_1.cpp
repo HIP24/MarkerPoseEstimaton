@@ -30,8 +30,8 @@ class directLinearTransformation{
 			bool patternfound = cv::findChessboardCorners(image_gray, patternsize, corners,
 					cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE
 					+ cv::CALIB_CB_FAST_CHECK);
-			if(patternfound){
-                imageoutput = objectImage.clone();
+			imageoutput = objectImage.clone();
+            if(patternfound){
 			    cv::drawChessboardCorners(imageoutput, patternsize, cv::Mat(corners), patternfound);
             }
 		}
