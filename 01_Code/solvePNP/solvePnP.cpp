@@ -39,7 +39,12 @@ class poseEstimate{
 
 		void calculateTransRot(){
 			// Call solvePnP()
-			cv::solvePnP(activeSetXYZ_, corners, cameraMatrix_, distCoeffs_, rvec, tvec);
+			if(activeSetXYZ_.size() == corners.size()){
+				cv::solvePnP(activeSetXYZ_, corners, cameraMatrix_, distCoeffs_, rvec, tvec);
+			}else{
+				std::cout << "Not the same size!" << std::endl;
+			}
+			
 			/*std::cout << "Distance to Object: " << tvec.at<double>(2) << std::endl;
 			std::cout << "x deviation: " << tvec.at<double>(0) << std::endl;
 			std::cout << "y deviation: " << tvec.at<double>(1) << std::endl << std::endl;*/
@@ -135,7 +140,7 @@ int main(){
 			ePose.calculateTransRot();
 			ePose.displayTransRot(out);
 		}
-		std::cout << "Corners: " << ePose.getCornerXY() << std::endl;
+		//std::cout << "Corners: " << ePose.getCornerXY() << std::endl;
 		
     }
 	return 0;

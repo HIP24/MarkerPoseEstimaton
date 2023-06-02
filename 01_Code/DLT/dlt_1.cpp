@@ -10,7 +10,7 @@
 class directLinearTransformation{
     public:
         // Constructor
-        directLinearTransformation(std::vector<cv::Point3f> activeSetXYZ):activeSetXYZ_(activeSetXYZ){}
+        directLinearTransformation(const std::vector<cv::Point3f>& activeSetXYZ):activeSetXYZ_(activeSetXYZ){}
         // Destructor
         ~directLinearTransformation(){}
 
@@ -30,9 +30,10 @@ class directLinearTransformation{
 			bool patternfound = cv::findChessboardCorners(image_gray, patternsize, corners,
 					cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE
 					+ cv::CALIB_CB_FAST_CHECK);
-			if(patternfound)
-			imageoutput = objectImage.clone();
-			cv::drawChessboardCorners(imageoutput, patternsize, cv::Mat(corners), patternfound);
+			if(patternfound){
+                imageoutput = objectImage.clone();
+			    cv::drawChessboardCorners(imageoutput, patternsize, cv::Mat(corners), patternfound);
+            }
 		}
 
         void calculateTransRot(){
@@ -58,6 +59,7 @@ class directLinearTransformation{
                 X.at<double>(i,2) = activeSetXYZ_[i].z;
                 X.at<double>(i,3) = double(i)+1.0;
             }
+            //std::cout << "Y matrix:\n" << Y << std::endl << std::endl << "X matrix:\n" << X << std::endl;
             cv::Mat XT;
             cv::transpose(X,XT);
             out = (XT*Y)/(XT*X);
@@ -71,7 +73,36 @@ class directLinearTransformation{
             cv::Mat K = U * cv::Mat::diag(S);
             cv::Mat T = cv::Mat::diag(S) * Vt.t();
 
-            std::cout << T << std::endl;
+            // Normalize
+            // Extract intrinsic parameters
+            double focalLength = K.at<double>(0, 0);
+            double principalPointX = K.at<double>(0, 2);
+            double principalPointY = K.at<double>(1, 2);
+
+            // Normalize intrinsic parameters
+            cv::Mat normalizedK = K.clone();
+            normalizedK /= focalLength;
+
+            // Extract rotation matrix R and translation vector t
+            cv::Mat R = T(cv::Rect(0, 0, 3, 3)).clone();
+            cv::Mat t = T(cv::Rect(3, 0, 1, 3)).clone();
+            
+            // Normalize rotation matrix R (optional step)
+            cv::SVD svd(R);
+            R = svd.u * svd.vt;
+            
+            // Combine R and t into the camera projection matrix [R | t]
+            cv::Mat Rt;
+            cv::hconcat(R, t, Rt);
+
+            // Apply normalization for principal point
+            Rt.at<double>(0, 2) -= principalPointX;
+            Rt.at<double>(1, 2) -= principalPointY;
+
+            std::cout << "test!" << std::endl;
+            std::cout << normalizedK.size() << Rt.rows << std::endl;
+            cv::Mat normMat = normalizedK*Rt;
+            //std::cout << normMat << std::endl;
 		}
 
 
@@ -106,7 +137,7 @@ int main(){
 
     key_t key;
     while(key != 27){                   // Do till <ESC> was pressed
-        key = cv::waitKey();                  // Update window
+        key = cv::waitKey(5);                  // Update window
 		video >> vidImg;                     // Get image from
         if (vidImg.empty()){
 			video.set(cv::CAP_PROP_POS_FRAMES, 0);
