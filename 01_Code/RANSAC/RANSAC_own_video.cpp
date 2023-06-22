@@ -7,6 +7,65 @@
 #include <vector>
 #include <numeric>
 
+bool solvePnPRansacOwn(const std::vector<cv::Point3f>& objectPoints,
+                       const std::vector<cv::Point2f>& imagePoints,
+                       const cv::Mat& cameraMatrix,
+                       const cv::Mat& distCoeffs,
+                       cv::Mat& rvec,
+                       cv::Mat& tvec,
+                       int iterationsCount = 100,
+                       float reprojectionError = 8.0)
+{
+    int numPoints = objectPoints.size();
+    int bestNumInliers = 0;
+    cv::Mat bestRvec, bestTvec;
+
+    for (int i = 0; i < iterationsCount; i++)
+    {
+        // Randomly select a subset of points
+        std::vector<int> indices(numPoints);
+        std::iota(indices.begin(), indices.end(), 0);
+        std::random_shuffle(indices.begin(), indices.end());
+        std::vector<cv::Point3f> objectPointsSubset = {objectPoints[indices[0]], objectPoints[indices[1]], objectPoints[indices[2]], objectPoints[indices[3]]};
+        std::vector<cv::Point2f> imagePointsSubset = {imagePoints[indices[0]], imagePoints[indices[1]], imagePoints[indices[2]], imagePoints[indices[3]]};
+
+        // Estimate the pose using the selected subset of points
+        cv::Mat rvecSubset, tvecSubset;
+        bool success = cv::solvePnP(objectPointsSubset, imagePointsSubset, cameraMatrix, distCoeffs, rvecSubset, tvecSubset);
+
+        // Count the number of inliers
+        if (success)
+        {
+            int numInliers = 0;
+            for (int j = 0; j < numPoints; j++)
+            {
+                std::vector<cv::Point3f> objectPoint = {objectPoints[j]};
+                std::vector<cv::Point2f> projectedPoint;
+                cv::projectPoints(objectPoint, rvecSubset, tvecSubset, cameraMatrix, distCoeffs, projectedPoint);
+                double distance = cv::norm(projectedPoint[0] - imagePoints[j]);
+                if (distance < reprojectionError)
+                {
+                    numInliers++;
+                }
+            }
+
+            // Update the best pose
+            if (numInliers > bestNumInliers)
+            {
+                bestRvec = rvecSubset;
+                bestTvec = tvecSubset;
+                bestNumInliers = numInliers;
+            }
+        }
+    }
+
+    // Set the output pose to the best pose
+    rvec = bestRvec;
+    tvec = bestTvec;
+
+    return (bestNumInliers > 0);
+}
+
 // Function to compute the homography using RANSAC
 cv::Mat findHomographyOwnRANSAC(const std::vector<cv::Point2f> &srcPoints,
                                 const std::vector<cv::Point2f> &dstPoints,
@@ -201,10 +260,12 @@ int main()
 
             // Estimate the pose of the chessboard
             cv::Mat rvec, tvec;
-             bool success = cv::solvePnPRansac(objectPoints, imagePoints, camera_matrix, distortion_coeffs, rvec, tvec);
+            //bool success = cv::solvePnPRansac(objectPoints, imagePoints, camera_matrix, distortion_coeffs, rvec, tvec);
+            bool success = solvePnPRansacOwn(objectPoints, imagePoints, camera_matrix, distortion_coeffs, rvec, tvec);
+            std::cout << "tvec: " << tvec << std::endl;
+            std::cout << "rvec: " << rvec << std::endl;
 
-
-                        // Draw the coordinate axes on the frame
+            // Draw the coordinate axes on the frame
             if (success)
             {
                 std::vector<cv::Point3f> axisPoints = {cv::Point3f(0, 0, 0), cv::Point3f(0.1, 0, 0), cv::Point3f(0, 0.1, 0), cv::Point3f(0, 0, 0.1)};
