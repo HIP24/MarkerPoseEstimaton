@@ -45,10 +45,6 @@ class poseEstimate{
 			}else{
 				std::cout << "Not the same size!" << std::endl;
 			}
-			
-			/*std::cout << "Distance to Object: " << tvec.at<double>(2) << std::endl;
-			std::cout << "x deviation: " << tvec.at<double>(0) << std::endl;
-			std::cout << "y deviation: " << tvec.at<double>(1) << std::endl << std::endl;*/
 		}
 		void displayTransRot(const cv::Mat& out){
 			cv::Mat frame = out.clone();
@@ -71,9 +67,18 @@ class poseEstimate{
 			cv::putText(frame, xDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
 			y += deviationTextSize.height + padding;
 			cv::putText(frame, yDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
-
+			
+			// Generate Coordinatesystem
+			
+			std::vector<cv::Point3f> axisPoints = {cv::Point3f(0, 0, 0), cv::Point3f(0.1, 0, 0), cv::Point3f(0, 0.1, 0), cv::Point3f(0, 0, 0.1)};
+			// Project the 3D axis points onto the image plane
+			std::vector<cv::Point2f> projectedPoints;
+			cv::projectPoints(axisPoints, rvec, tvec, cameraMatrix_, distCoeffs_, projectedPoints);
+			// Draw the coordinate axes on the frame
+			cv::line(frame, projectedPoints[0], projectedPoints[1], cv::Scalar(0, 0, 255), 3);
+			cv::line(frame, projectedPoints[0], projectedPoints[2], cv::Scalar(0, 255, 0), 3);
+			cv::line(frame, projectedPoints[0], projectedPoints[3], cv::Scalar(255, 0, 0), 3);
 			cv::imshow("CheesboardCorner", frame);
-
 		}
 
 	private:
@@ -132,20 +137,13 @@ int main(){
 		cv::undistort(vidImg, vidImgUndistort, camera_matrix, distortion_coeffs);
 		ePose.findChessboardCorners(vidImgUndistort);
 		cv::Mat out = ePose.getImageout();
-		// Resizing otherwise it would take too long to display every frame
-		std::vector<cv::Point2f> corners = ePose.getCornerXY();
-		//cv::line(out,cv::Point_<int>(corners[53].x,corners[53].y),cv::Point_<int>(corners[51].x,corners[51].y),cv::Scalar(0,255,0),8);
-		//cv::line(out,cv::Point_<int>(corners[53].x,corners[53].y),cv::Point_<int>(corners[35].x,corners[35].y),cv::Scalar(0,0,255),8);
-		cv::resize(out, out, cv::Size(out.cols/2, out.rows/2));
-		
 		if(!ePose.getCornerXY().empty() && ePose.getActiveSetXYZ().size() == ePose.getCornerXY().size()){
+			//cv::resize(out, out, cv::Size(out.cols/2, out.rows/2));
 			ePose.calculateTransRot();
 			ePose.displayTransRot(out);
 		}else{
 			cv::imshow("CheesboardCorner", out);
 		}
-		//std::cout << "Corners: " << ePose.getCornerXY() << std::endl;
-		
     }
 	return 0;
 }
