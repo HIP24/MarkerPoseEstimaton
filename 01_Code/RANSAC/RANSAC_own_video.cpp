@@ -7,6 +7,65 @@
 #include <vector>
 #include <numeric>
 
+bool solvePnPOwn(const std::vector<cv::Point3f>& objectPoints,
+                 const std::vector<cv::Point2f>& imagePoints,
+                 const cv::Mat& cameraMatrix,
+                 cv::Mat& rvec,
+                 cv::Mat& tvec)
+{
+    // Convert the input data to the right format
+    cv::Mat objectPointsMat(objectPoints.size(), 3, CV_32F);
+    for (size_t i = 0; i < objectPoints.size(); i++)
+    {
+        objectPointsMat.at<float>(i, 0) = objectPoints[i].x;
+        objectPointsMat.at<float>(i, 1) = objectPoints[i].y;
+        objectPointsMat.at<float>(i, 2) = objectPoints[i].z;
+    }
+    cv::Mat imagePointsMat(imagePoints.size(), 2, CV_32F);
+    for (size_t i = 0; i < imagePoints.size(); i++)
+    {
+        imagePointsMat.at<float>(i, 0) = imagePoints[i].x;
+        imagePointsMat.at<float>(i, 1) = imagePoints[i].y;
+    }
+
+    // Compute the homography between the object points and the image points
+    cv::Mat H = cv::findHomography(objectPointsMat, imagePointsMat);
+
+    // Compute the camera pose from the homography
+    cv::Mat Kinv = cameraMatrix.inv();
+    cv::Mat h1 = H.col(0);
+    cv::Mat h2 = H.col(1);
+    cv::Mat h3 = H.col(2);
+    cv::Mat r1 = Kinv * h1;
+    cv::Mat r2 = Kinv * h2;
+    cv::Mat r3 = r1.cross(r2);
+    cv::Mat t = Kinv * h3;
+    double norm1 = cv::norm(r1);
+    double norm2 = cv::norm(r2);
+    double tnorm = (norm1 + norm2) / 2.0;
+    r1 /= norm1;
+    r2 /= norm2;
+    t /= tnorm;
+
+    // Create the rotation matrix
+    cv::Mat R(3, 3, CV_64F);
+    for (int i = 0; i < 3; i++)
+    {
+        R.at<double>(i, 0) = r1.at<double>(i, 0);
+        R.at<double>(i, 1) = r2.at<double>(i, 0);
+        R.at<double>(i, 2) = r3.at<double>(i, 0);
+    }
+
+    // Convert the rotation matrix to a rotation vector
+    cv::Rodrigues(R, rvec);
+
+    // Set the output translation vector
+    tvec = t;
+
+    return true;
+}
+
+
 bool solvePnPRansacOwn(const std::vector<cv::Point3f>& objectPoints,
                        const std::vector<cv::Point2f>& imagePoints,
                        const cv::Mat& cameraMatrix,
@@ -31,7 +90,8 @@ bool solvePnPRansacOwn(const std::vector<cv::Point3f>& objectPoints,
 
         // Estimate the pose using the selected subset of points
         cv::Mat rvecSubset, tvecSubset;
-        bool success = cv::solvePnP(objectPointsSubset, imagePointsSubset, cameraMatrix, distCoeffs, rvecSubset, tvecSubset);
+        //bool success = cv::solvePnP(objectPointsSubset, imagePointsSubset, cameraMatrix, distCoeffs, rvecSubset, tvecSubset);
+        bool success = solvePnPOwn(objectPoints, imagePoints, cameraMatrix, rvecSubset, tvecSubset);
 
         // Count the number of inliers
         if (success)
@@ -66,117 +126,6 @@ bool solvePnPRansacOwn(const std::vector<cv::Point3f>& objectPoints,
     return (bestNumInliers > 0);
 }
 
-// Function to compute the homography using RANSAC
-cv::Mat findHomographyOwnRANSAC(const std::vector<cv::Point2f> &srcPoints,
-                                const std::vector<cv::Point2f> &dstPoints,
-                                int maxIterations = 1000,
-                                double distanceThreshold = 3.0,
-                                double confidence = 0.99)
-{
-    // Number of points
-    int numPoints = srcPoints.size();
-
-    // Best homography
-    cv::Mat bestH;
-
-    // Best number of inliers
-    int bestNumInliers = 0;
-
-    // Random number generator
-    cv::RNG rng;
-
-    // RANSAC iterations
-    for (int i = 0; i < maxIterations; i++)
-    {
-        // Randomly select 4 points
-        std::vector<int> indices(numPoints);
-        std::iota(indices.begin(), indices.end(), 0);
-        std::random_shuffle(indices.begin(), indices.end(), rng);
-        std::vector<cv::Point2f> srcPointsSubset = {srcPoints[indices[0]], srcPoints[indices[1]], srcPoints[indices[2]], srcPoints[indices[3]]};
-        std::vector<cv::Point2f> dstPointsSubset = {dstPoints[indices[0]], dstPoints[indices[1]], dstPoints[indices[2]], dstPoints[indices[3]]};
-
-        // Compute the homography using the selected points
-        cv::Mat A(8, 9, CV_64F);
-        for (int j = 0; j < 4; j++)
-        {
-            float X = srcPointsSubset[j].x;
-            float Y = srcPointsSubset[j].y;
-            float u = dstPointsSubset[j].x;
-            float v = dstPointsSubset[j].y;
-
-            A.at<double>(2 * j, 0) = -X;
-            A.at<double>(2 * j, 1) = -Y;
-            A.at<double>(2 * j, 2) = -1.0;
-            A.at<double>(2 * j, 6) = u * X;
-            A.at<double>(2 * j, 7) = u * Y;
-            A.at<double>(2 * j, 8) = u;
-
-            A.at<double>(2 * j + 1, 3) = -X;
-            A.at<double>(2 * j + 1, 4) = -Y;
-            A.at<double>(2 * j + 1, 5) = -1.0;
-            A.at<double>(2 * j + 1, 6) = v * X;
-            A.at<double>(2 * j + 1, 7) = v * Y;
-            A.at<double>(2 * j + 1, 8) = v;
-        }
-
-        cv::Mat U, D, Vt;
-        cv::SVDecomp(A, U, D, Vt, cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
-        cv::Mat H = Vt.row(Vt.rows - 1).reshape(0, 3);
-
-        // Count the number of inliers
-        int numInliers = 0;
-        for (int j = 0; j < numPoints; j++)
-        {
-            cv::Mat srcPoint = (cv::Mat_<double>(3, 1) << srcPoints[j].x, srcPoints[j].y, 1.0);
-            cv::Mat dstPoint = (cv::Mat_<double>(3, 1) << dstPoints[j].x, dstPoints[j].y, 1.0);
-            cv::Mat projectedPoint = H * srcPoint;
-            projectedPoint /= projectedPoint.at<double>(2);
-            double distance = cv::norm(projectedPoint - dstPoint);
-            if (distance < distanceThreshold)
-            {
-                numInliers++;
-            }
-        }
-
-        // Update the best homography
-        if (numInliers > bestNumInliers)
-        {
-            bestH = H;
-            bestNumInliers = numInliers;
-        }
-
-        // Update the number of iterations based on the inlier ratio
-        double inlierRatio = static_cast<double>(numInliers) / numPoints;
-        double logConfidence = log(1.0 - confidence);
-        double logOneMinusInlierRatio = log(1.0 - pow(inlierRatio, 4));
-        maxIterations = static_cast<int>(logConfidence / logOneMinusInlierRatio);
-    }
-
-    // Refine the homography using all inliers
-    std::vector<cv::Point2f> srcPointsInliers, dstPointsInliers;
-    for (int j = 0; j < numPoints; j++)
-    {
-        cv::Mat srcPoint = (cv::Mat_<double>(3, 1) << srcPoints[j].x, srcPoints[j].y, 1.0);
-        cv::Mat dstPoint = (cv::Mat_<double>(3, 1) << dstPoints[j].x, dstPoints[j].y, 1.0);
-        cv::Mat projectedPoint = bestH * srcPoint;
-        projectedPoint /= projectedPoint.at<double>(2);
-        double distance = cv::norm(projectedPoint - dstPoint);
-        if (distance < distanceThreshold)
-        {
-            srcPointsInliers.push_back(srcPoints[j]);
-            dstPointsInliers.push_back(dstPoints[j]);
-        }
-    }
-
-    std::cout << "srcPointsInliers size: " << srcPointsInliers.size() << std::endl;
-    std::cout << "dstPointsInliers size: " << dstPointsInliers.size() << std::endl;
-
-
-
-    bestH = cv::findHomography(srcPointsInliers, dstPointsInliers);
-
-    return bestH;
-}
 
 std::vector<cv::Point2f> findChessboardCorners(const cv::Mat& input)
 {
@@ -227,6 +176,7 @@ int main()
 	fs1["distortion_coefficients"] >> distortion_coeffs;
 	// Release the file storage object and close the file
 	fs1.release();
+    camera_matrix.convertTo(camera_matrix, CV_64F);
 
 
     // Real-world coordinates of the chessboard corners (in meters)
