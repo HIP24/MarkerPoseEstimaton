@@ -28,8 +28,61 @@ bool solvePnPOwn(const std::vector<cv::Point3f>& objectPoints,
         imagePointsMat.at<float>(i, 1) = imagePoints[i].y;
     }
 
-    // Compute the homography between the object points and the image points
-    cv::Mat H = cv::findHomography(objectPointsMat, imagePointsMat);
+    // Check if the number of points is at least 4
+    if (objectPoints.size() < 4 || imagePoints.size() < 4)
+    {
+        std::cout << "Insufficient number of points to compute homography!" << std::endl;
+        return false;
+    }
+    
+    // Construct the matrix A
+    cv::Mat A(2 * objectPoints.size(), 9, CV_64F);
+    for (size_t i = 0; i < objectPoints.size(); i++)
+    {
+        const cv::Point3f& X = objectPoints[i];
+        const cv::Point2f& x = imagePoints[i];
+    
+        A.at<double>(2 * i, 0) = -X.x;
+        A.at<double>(2 * i, 1) = -X.y;
+        A.at<double>(2 * i, 2) = -1;
+        A.at<double>(2 * i, 3) = 0;
+        A.at<double>(2 * i, 4) = 0;
+        A.at<double>(2 * i, 5) = 0;
+        A.at<double>(2 * i, 6) = x.x * X.x;
+        A.at<double>(2 * i, 7) = x.x * X.y;
+        A.at<double>(2 * i, 8) = x.x;
+    
+        A.at<double>(2 * i + 1, 0) = 0;
+        A.at<double>(2 * i + 1, 1) = 0;
+        A.at<double>(2 * i + 1, 2) = 0;
+        A.at<double>(2 * i + 1, 3) = -X.x;
+        A.at<double>(2 * i + 1, 4) = -X.y;
+        A.at<double>(2 * i + 1, 5) = -1;
+        A.at<double>(2 * i + 1, 6) = x.y * X.x;
+        A.at<double>(2 * i + 1, 7) = x.y * X.y;
+        A.at<double>(2 * i + 1, 8) = x.y;
+    }
+    
+    // Perform singular value decomposition (SVD) on matrix A
+    cv::Mat u, w, vt;
+    cv::SVD::compute(A, w, u, vt);
+    
+    // Extract the column of V corresponding to the smallest singular value
+    cv::Mat h = vt.row(vt.rows - 1).t();
+    
+    // Normalize the homography vector
+    h /= cv::norm(h);
+    
+    // Reshape the normalized vector into a 3x3 matrix
+    cv::Mat H(3, 3, CV_64F);
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            H.at<double>(i, j) = h.at<double>(3 * i + j);
+        }
+    }
+
 
     // Compute the camera pose from the homography
     cv::Mat Kinv = cameraMatrix.inv();
