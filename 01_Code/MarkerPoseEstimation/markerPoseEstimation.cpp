@@ -318,9 +318,13 @@ class poseEstimateRansac{
 };
 
 void printError(cv::Mat solvepnpTvec, cv::Mat solvepnpRvec, cv::Mat ransacTvec, cv::Mat ransacRvec){
-	std::cout << "Error between (solvepnpTvec - ransacTvec): " << std::endl << solvepnpTvec - ransacTvec << 
-		std::endl << "Error between (solvepnpRvec - ransacRvec): " << std::endl << solvepnpRvec - ransacRvec << std::endl;
+    cv::Mat tError = solvepnpTvec - ransacTvec;
+    cv::Mat rError = solvepnpRvec - ransacRvec;
+    std::cout << "Error between solvePnP and RANSAC:" << std::endl;
+    std::cout << "Translation error: [" << tError.at<double>(0) << ", " << tError.at<double>(1) << ", " << tError.at<double>(2) << "]" << std::endl;
+    std::cout << "Rotation error: [" << rError.at<double>(0) << ", " << rError.at<double>(1) << ", " << rError.at<double>(2) << "]" << std::endl;
 }
+
 
 
 int main(){
@@ -359,9 +363,15 @@ int main(){
 	key_t key;
 	// Open the CSV file for writing
 	std::ofstream file("data/Error.csv");
-	std::string  string1 = "Error tvec";
-	std::string  string2 = "Error rvec";
-    file << string1 << "," << string2 << std::endl;
+	std::ofstream fileSolvePnP("data/SolvePnP.csv");
+	std::ofstream fileRansac("data/Ransac.csv");
+
+	// Write the headers
+	fileSolvePnP << "tvec_x;tvec_y;tvec_z;rvec_x;rvec_y;rvec_z" << std::endl;
+	fileRansac << "tvec_x;tvec_y;tvec_z;rvec_x;rvec_y;rvec_z" << std::endl;
+    file << "tvec_x_error;tvec_y_error;tvec_z_error;rvec_x_error;rvec_y_error;rvec_z_error" << std::endl;
+
+
 	while(key != 27){                   // Do till <ESC> was pressed
         key = cv::waitKey(5);                  // Update window
 		video >> vidImg;                     // Get image from
@@ -396,18 +406,32 @@ int main(){
 			cv::resize(out2, out2, cv::Size(out2.cols/1.2, out2.rows/1.2));
 			cv::imshow("CheesboardCornerRansac", out2);
 		}
+
+    	// Write the tvec and rvec values to the CSV files
+    	cv::Mat tSolvePnP = ePose.getTvec();
+    	cv::Mat rSolvePnP = ePose.getRvec();
+    	fileSolvePnP << tSolvePnP.at<double>(0) << ";" << tSolvePnP.at<double>(1) << ";" << tSolvePnP.at<double>(2) << ";"
+    	             << rSolvePnP.at<double>(0) << ";" << rSolvePnP.at<double>(1) << ";" << rSolvePnP.at<double>(2) << std::endl;
+
+    	cv::Mat tRansac = ePose2.getTvec();
+    	cv::Mat rRansac = ePose2.getRvec();
+    	fileRansac << tRansac.at<double>(0) << ";" << tRansac.at<double>(1) << ";" << tRansac.at<double>(2) << ";"
+               << rRansac.at<double>(0) << ";" << rRansac.at<double>(1) << ";" << rRansac.at<double>(2) << std::endl;
+
+
 		// Print Error between solvePnP and own Ransac
 		printError(ePose.getTvec(), ePose.getRvec(), ePose2.getTvec(), ePose2.getRvec());
-		cv::Mat t = ePose.getTvec() - ePose2.getTvec();
-		cv::Mat r = ePose.getRvec() - ePose2.getRvec();
-		for(signed int i = 0; i < t.rows; i++){
-			file << t.at<double>(i) << "," << r.at<double>(i) << std::endl;
-		}
-		file << std::endl;
-		//file << ePose.getTvec()-ePose2.getTvec() << ";" << ePose.getRvec()-ePose2.getRvec() << std::endl;
+		// Write the errors to the CSV file
+    	cv::Mat tError = ePose.getTvec() - ePose2.getTvec();
+    	cv::Mat rError = ePose.getRvec() - ePose2.getRvec();
+    	file << tError.at<double>(0) << ";" << tError.at<double>(1) << ";" << tError.at<double>(2) << ";"
+    	     << rError.at<double>(0) << ";" << rError.at<double>(1) << ";" << rError.at<double>(2) << std::endl;
 	}
 	// Release the video capture
 	video.release();
+	// Close the file streams
+	fileSolvePnP.close();
+	fileRansac.close();
 	file.close();
 	return 0;
 }
