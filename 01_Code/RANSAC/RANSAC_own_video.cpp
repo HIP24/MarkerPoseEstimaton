@@ -125,8 +125,8 @@ bool solvePnPRansacOwn(const std::vector<cv::Point3f>& objectPoints,
                        const cv::Mat& distCoeffs,
                        cv::Mat& rvec,
                        cv::Mat& tvec,
-                       int iterationsCount = 100,
-                       float reprojectionError = 8.0)
+                       int iterationsCount = 1000,
+                       float reprojectionError = 4.0)
 {
     int numPoints = objectPoints.size();
     int bestNumInliers = 0;
@@ -144,7 +144,8 @@ bool solvePnPRansacOwn(const std::vector<cv::Point3f>& objectPoints,
         // Estimate the pose using the selected subset of points
         cv::Mat rvecSubset, tvecSubset;
         //bool success = cv::solvePnP(objectPointsSubset, imagePointsSubset, cameraMatrix, distCoeffs, rvecSubset, tvecSubset);
-        bool success = solvePnPOwn(objectPoints, imagePoints, cameraMatrix, rvecSubset, tvecSubset);
+        //bool success = solvePnPOwn(objectPoints, imagePoints, cameraMatrix, rvecSubset, tvecSubset);
+        bool success = solvePnPOwn(objectPointsSubset, imagePointsSubset, cameraMatrix, rvecSubset, tvecSubset);
 
         // Count the number of inliers
         if (success)
@@ -234,22 +235,18 @@ int main()
 
     // Real-world coordinates of the chessboard corners (in meters)
     std::vector<cv::Point3f> objectPoints;
-    for (int i = 0; i < chessboardSize.height; i++)
-    {
-        for (int j = 0; j < chessboardSize.width; j++)
-        {
+    for (int i = 0; i < chessboardSize.height; i++){
+        for (int j = 0; j < chessboardSize.width; j++){
             objectPoints.push_back(cv::Point3f(j * squareSize, i * squareSize, 0));
         }
     }
 
     // Process each frame of the video
-    while (true)
-    {
+    while (true){
         // Read the next frame
         cv::Mat frame;
         cap >> frame;
-        if (frame.empty())
-        {
+        if (frame.empty()){
             break;
         }
 
