@@ -59,8 +59,8 @@ class poseEstimateSolvePnP{
 			std::string rotz = "z rotation: " + std::to_string(rvec.at<double>(2));
 
 			int fontFace = cv::FONT_HERSHEY_SIMPLEX;
-			double fontScale = 0.5;
-			int thickness = 1;
+			double fontScale = 0.7;
+			int thickness = 2;
 			int baseline = 0;
 			cv::Size distanceTextSize = cv::getTextSize(distanceText, fontFace, fontScale, thickness, &baseline);
 			cv::Size deviationTextSize = cv::getTextSize(xDeviationText, fontFace, fontScale, thickness, &baseline);
@@ -68,17 +68,17 @@ class poseEstimateSolvePnP{
 			int padding = 10;
 			int y = padding + distanceTextSize.height;
 			// Display deviation values on the left side of the frame
-			cv::putText(frame, distanceText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, distanceText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += distanceTextSize.height + padding;
-			cv::putText(frame, xDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, xDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += deviationTextSize.height + padding;
-			cv::putText(frame, yDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, yDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += deviationTextSize.height + padding;
-			cv::putText(frame, rotx, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, rotx, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += deviationTextSize.height + padding;
-			cv::putText(frame, roty, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, roty, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += deviationTextSize.height + padding;
-			cv::putText(frame, rotz, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, rotz, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			// Generate Coordinatesystem
 			
 			std::vector<cv::Point3f> axisPoints = {cv::Point3f(0, 0, 0), cv::Point3f(0.1, 0, 0), cv::Point3f(0, 0.1, 0), cv::Point3f(0, 0, 0.1)};
@@ -89,6 +89,7 @@ class poseEstimateSolvePnP{
 			cv::line(frame, projectedPoints[0], projectedPoints[1], cv::Scalar(0, 0, 255), 3);
 			cv::line(frame, projectedPoints[0], projectedPoints[2], cv::Scalar(0, 255, 0), 3);
 			cv::line(frame, projectedPoints[0], projectedPoints[3], cv::Scalar(255, 0, 0), 3);
+			cv::resize(frame, frame, cv::Size(frame.cols/1.2, frame.rows/1.2));
 			cv::imshow("CheesboardCornersolvePnP", frame);
 		}
 
@@ -273,8 +274,8 @@ class poseEstimateRansac{
 			std::string rotz = "z rotation: " + std::to_string(rvec_.at<double>(2));
 
 			int fontFace = cv::FONT_HERSHEY_SIMPLEX;
-			double fontScale = 0.5;
-			int thickness = 1;
+			double fontScale = 0.7;
+			int thickness = 2;
 			int baseline = 0;
 			cv::Size distanceTextSize = cv::getTextSize(distanceText, fontFace, fontScale, thickness, &baseline);
 			cv::Size deviationTextSize = cv::getTextSize(xDeviationText, fontFace, fontScale, thickness, &baseline);
@@ -282,17 +283,17 @@ class poseEstimateRansac{
 			int padding = 10;
 			int y = padding + distanceTextSize.height;
 			// Display deviation values on the left side of the frame
-			cv::putText(frame, distanceText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, distanceText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += distanceTextSize.height + padding;
-			cv::putText(frame, xDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, xDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += deviationTextSize.height + padding;
-			cv::putText(frame, yDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, yDeviationText, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += deviationTextSize.height + padding;
-			cv::putText(frame, rotx, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, rotx, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += deviationTextSize.height + padding;
-			cv::putText(frame, roty, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, roty, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			y += deviationTextSize.height + padding;
-			cv::putText(frame, rotz, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+			cv::putText(frame, rotz, cv::Point(padding, y), fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 			// Generate Coordinatesystem
 			
 			std::vector<cv::Point3f> axisPoints = {cv::Point3f(0, 0, 0), cv::Point3f(0.1, 0, 0), cv::Point3f(0, 0.1, 0), cv::Point3f(0, 0, 0.1)};
@@ -303,6 +304,7 @@ class poseEstimateRansac{
 			cv::line(frame, projectedPoints[0], projectedPoints[1], cv::Scalar(0, 0, 255), 3);
 			cv::line(frame, projectedPoints[0], projectedPoints[2], cv::Scalar(0, 255, 0), 3);
 			cv::line(frame, projectedPoints[0], projectedPoints[3], cv::Scalar(255, 0, 0), 3);
+			cv::resize(frame, frame, cv::Size(frame.cols/1.2, frame.rows/1.2));
 			cv::imshow("CheesboardCornerRansac", frame);
 		}
 		
@@ -378,6 +380,7 @@ int main(){
 			ePose.calculateTransRot();
 			ePose.displayTransRot(out);
 		}else{
+			cv::resize(out, out, cv::Size(out.cols/1.2, out.rows/1.2));
 			cv::imshow("CheesboardCornersolvePnP", out);
 		}
 		// FOR Ransac
@@ -390,6 +393,7 @@ int main(){
 				ePose2.displayTransRot(out2);  
 			}
 		}else{
+			cv::resize(out2, out2, cv::Size(out2.cols/1.2, out2.rows/1.2));
 			cv::imshow("CheesboardCornerRansac", out2);
 		}
 		// Print Error between solvePnP and own Ransac
