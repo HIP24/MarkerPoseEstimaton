@@ -137,35 +137,18 @@ class poseEstimateRansac{
                  const std::vector<cv::Point2f>& imagePoints,
                  cv::Mat& rvec,
                  cv::Mat& tvec){
-			// Convert the input data to the right format
-			cv::Mat objectPointsMat(objectPoints.size(), 3, CV_32F);
-			for (size_t i = 0; i < objectPoints.size(); i++)
-			{
-				objectPointsMat.at<float>(i, 0) = objectPoints[i].x;
-				objectPointsMat.at<float>(i, 1) = objectPoints[i].y;
-				objectPointsMat.at<float>(i, 2) = objectPoints[i].z;
-			}
-			cv::Mat imagePointsMat(imagePoints.size(), 2, CV_32F);
-			for (size_t i = 0; i < imagePoints.size(); i++)
-			{
-				imagePointsMat.at<float>(i, 0) = imagePoints[i].x;
-				imagePointsMat.at<float>(i, 1) = imagePoints[i].y;
-			}
-
 			// Check if the number of points is at least 4
-			if (objectPoints.size() < 4 || imagePoints.size() < 4)
-			{
+			if (objectPoints.size() < 4 || imagePoints.size() < 4){
 				std::cout << "Insufficient number of points to compute homography!" << std::endl;
 				return false;
 			}
-			
+
 			// Construct the matrix A
 			cv::Mat A(2 * objectPoints.size(), 9, CV_64F);
-			for (size_t i = 0; i < objectPoints.size(); i++)
-			{
-				const cv::Point3f& X = objectPoints[i];
-				const cv::Point2f& x = imagePoints[i];
-			
+			for (size_t i = 0; i < objectPoints.size(); i++){
+				const cv::Point3f &X = objectPoints[i];
+				const cv::Point2f &x = imagePoints[i];
+
 				A.at<double>(2 * i, 0) = -X.x;
 				A.at<double>(2 * i, 1) = -X.y;
 				A.at<double>(2 * i, 2) = -1;
@@ -175,7 +158,7 @@ class poseEstimateRansac{
 				A.at<double>(2 * i, 6) = x.x * X.x;
 				A.at<double>(2 * i, 7) = x.x * X.y;
 				A.at<double>(2 * i, 8) = x.x;
-			
+
 				A.at<double>(2 * i + 1, 0) = 0;
 				A.at<double>(2 * i + 1, 1) = 0;
 				A.at<double>(2 * i + 1, 2) = 0;
@@ -186,7 +169,7 @@ class poseEstimateRansac{
 				A.at<double>(2 * i + 1, 7) = x.y * X.y;
 				A.at<double>(2 * i + 1, 8) = x.y;
 			}
-			
+
 			// Perform singular value decomposition (SVD) on matrix A
 			cv::Mat u, w, vt;
 			cv::SVD::compute(A, w, u, vt);
@@ -199,15 +182,11 @@ class poseEstimateRansac{
 			
 			// Reshape the normalized vector into a 3x3 matrix
 			cv::Mat H(3, 3, CV_64F);
-			for (int i = 0; i < 3; i++)
-			{
-				for (int j = 0; j < 3; j++)
-				{
+			for (int i = 0; i < 3; i++){
+				for (int j = 0; j < 3; j++){
 					H.at<double>(i, j) = h.at<double>(3 * i + j);
 				}
 			}
-
-
 			// Compute the camera pose from the homography
 			cv::Mat Kinv = cameraMatrix_.inv();
 			cv::Mat h1 = H.col(0);
@@ -226,8 +205,7 @@ class poseEstimateRansac{
 
 			// Create the rotation matrix
 			cv::Mat R(3, 3, CV_64F);
-			for (int i = 0; i < 3; i++)
-			{
+			for (int i = 0; i < 3; i++){
 				R.at<double>(i, 0) = r1.at<double>(i, 0);
 				R.at<double>(i, 1) = r2.at<double>(i, 0);
 				R.at<double>(i, 2) = r3.at<double>(i, 0);
@@ -235,10 +213,8 @@ class poseEstimateRansac{
 
 			// Convert the rotation matrix to a rotation vector
 			cv::Rodrigues(R, rvec);
-
 			// Set the output translation vector
 			tvec = t;
-
 			return true;
 		}
 		bool solvePnPRansacOwn(int iterationsCount = 100, float reprojectionError = 8.0){
@@ -257,9 +233,6 @@ class poseEstimateRansac{
 				// Estimate the pose using the selected subset of points
 				cv::Mat rvecSubset, tvecSubset;
 				bool success = solvePnPOwn(objectPointsSubset, imagePointsSubset, rvecSubset, tvecSubset);
-				//bool success = solvePnPOwn(activeSetXYZ_, corners, cameraMatrix_, rvecSubset, tvecSubset);
-				//bool success = false;
-				
 				// Count the number of inliers
 				if(success){
 					int numInliers = 0;
@@ -272,7 +245,6 @@ class poseEstimateRansac{
 							numInliers++;
 						}
 					}
-
 					// Update the best pose
 					if (numInliers > bestNumInliers){
 						bestRvec = rvecSubset;
@@ -384,8 +356,10 @@ int main(){
     poseEstimateRansac ePose2(activeSetXYZ, camera_matrix, distortion_coeffs);
 	key_t key;
 	// Open the CSV file for writing
-	//std::ofstream file("data/Error.csv");
-    //file << "Error tvec" << "," << "Error rvec" << std::endl;
+	std::ofstream file("data/Error.csv");
+	std::string  string1 = "Error tvec";
+	std::string  string2 = "Error rvec";
+    file << string1 << "," << string2 << std::endl;
 	while(key != 27){                   // Do till <ESC> was pressed
         key = cv::waitKey(5);                  // Update window
 		video >> vidImg;                     // Get image from
@@ -420,10 +394,16 @@ int main(){
 		}
 		// Print Error between solvePnP and own Ransac
 		printError(ePose.getTvec(), ePose.getRvec(), ePose2.getTvec(), ePose2.getRvec());
+		cv::Mat t = ePose.getTvec() - ePose2.getTvec();
+		cv::Mat r = ePose.getRvec() - ePose2.getRvec();
+		for(signed int i = 0; i < t.rows; i++){
+			file << t.at<double>(i) << "," << r.at<double>(i) << std::endl;
+		}
+		file << std::endl;
 		//file << ePose.getTvec()-ePose2.getTvec() << ";" << ePose.getRvec()-ePose2.getRvec() << std::endl;
 	}
 	// Release the video capture
 	video.release();
-	//file.close();
+	file.close();
 	return 0;
 }
