@@ -119,19 +119,19 @@ class poseEstimateRansac{
 		cv::Mat getRvec() const{return rvec_;}
 
 		void findChessboardCorners(const cv::Mat& input){
-			cv::Size patternsize(9,6); //interior number of corners
-			cv::Mat image_gray; //source image
+		    cv::Size patternsize(9,6); //interior number of corners
+		    cv::Mat image_gray; //source image
 			objectImage = input.clone();
-			cv::cvtColor(objectImage, image_gray, CV_BGR2GRAY);	// Convert to Gray
-			//CALIB_CB_FAST_CHECK saves a lot of time on images
-			//that do not contain any chessboard corners
-			bool patternfound = cv::findChessboardCorners(image_gray, patternsize, corners,
-					cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE
-					+ cv::CALIB_CB_FAST_CHECK);
-			imageoutput = objectImage.clone();
-			if(patternfound){
-				cv::drawChessboardCorners(imageoutput, patternsize, cv::Mat(corners), patternfound);
-			}
+		    cv::cvtColor(objectImage, image_gray, CV_BGR2GRAY);	// Convert to Gray
+		    //CALIB_CB_FAST_CHECK saves a lot of time on images
+		    //that do not contain any chessboard corners
+		    bool patternfound = cv::findChessboardCorners(image_gray, patternsize, corners,
+		            cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE
+		            + cv::CALIB_CB_FAST_CHECK);
+		    imageoutput = objectImage.clone();
+		    if(patternfound){
+		        cv::drawChessboardCorners(imageoutput, patternsize, cv::Mat(corners), patternfound);
+		    }
 		}
 
 		bool solvePnPOwn(const std::vector<cv::Point3f>& objectPoints,
@@ -217,7 +217,7 @@ class poseEstimateRansac{
 			// Set the output translation vector
 			tvec = t;
 			return true;
-		}
+		}	
 		bool solvePnPRansacOwn(int iterationsCount = 100, float reprojectionError = 8.0){
 			int numPoints = activeSetXYZ_.size();
 			int bestNumInliers = 0;
@@ -397,7 +397,7 @@ int main(){
 		ePose2.findChessboardCorners(vidImg);
 		cv::Mat out2 = ePose.getImageout();
 		if(!ePose2.getCornerXY().empty() && ePose2.getActiveSetXYZ().size() == ePose2.getCornerXY().size()){
-			bool success = ePose2.solvePnPRansacOwn(500,4.0);
+			bool success = ePose2.solvePnPRansacOwn(100,8.0);
 			// Draw the coordinate axes on the frame
             if (success){
 				ePose2.displayTransRot(out2);  
@@ -410,13 +410,13 @@ int main(){
     	// Write the tvec and rvec values to the CSV files
     	cv::Mat tSolvePnP = ePose.getTvec();
     	cv::Mat rSolvePnP = ePose.getRvec();
-    	fileSolvePnP << tSolvePnP.at<double>(0) << ";" << tSolvePnP.at<double>(1) << ";" << tSolvePnP.at<double>(2) << ";"
-    	             << rSolvePnP.at<double>(0) << ";" << rSolvePnP.at<double>(1) << ";" << rSolvePnP.at<double>(2) << std::endl;
+    	fileSolvePnP << tSolvePnP.at<double>(0) * 100 << ";" << tSolvePnP.at<double>(1) * 100<< ";" << tSolvePnP.at<double>(2) * 100<< ";"
+    	             << rSolvePnP.at<double>(0) * 100 << ";" << rSolvePnP.at<double>(1) * 100<< ";" << rSolvePnP.at<double>(2) * 100<< std::endl;
 
     	cv::Mat tRansac = ePose2.getTvec();
     	cv::Mat rRansac = ePose2.getRvec();
-    	fileRansac << tRansac.at<double>(0) << ";" << tRansac.at<double>(1) << ";" << tRansac.at<double>(2) << ";"
-               << rRansac.at<double>(0) << ";" << rRansac.at<double>(1) << ";" << rRansac.at<double>(2) << std::endl;
+    	fileRansac << tRansac.at<double>(0) * 100<< ";" << tRansac.at<double>(1) * 100<< ";" << tRansac.at<double>(2) * 100<< ";"
+               << rRansac.at<double>(0) * 100<< ";" << rRansac.at<double>(1) * 100<< ";" << rRansac.at<double>(2) * 100<< std::endl;
 
 
 		// Print Error between solvePnP and own Ransac
@@ -424,8 +424,8 @@ int main(){
 		// Write the errors to the CSV file
     	cv::Mat tError = ePose.getTvec() - ePose2.getTvec();
     	cv::Mat rError = ePose.getRvec() - ePose2.getRvec();
-    	file << tError.at<double>(0) << ";" << tError.at<double>(1) << ";" << tError.at<double>(2) << ";"
-    	     << rError.at<double>(0) << ";" << rError.at<double>(1) << ";" << rError.at<double>(2) << std::endl;
+    	file << tError.at<double>(0) * 100<< ";" << tError.at<double>(1) * 100<< ";" << tError.at<double>(2) * 100<< ";"
+    	     << rError.at<double>(0) * 100<< ";" << rError.at<double>(1) * 100<< ";" << rError.at<double>(2) * 100<< std::endl;
 	}
 	// Release the video capture
 	video.release();
