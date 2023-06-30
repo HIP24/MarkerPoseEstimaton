@@ -414,12 +414,12 @@ int main(){
     	cv::Mat tSolvePnP = ePose.getTvec();
     	cv::Mat rSolvePnP = ePose.getRvec();
     	fileSolvePnP << tSolvePnP.at<double>(0) * 100 << ";" << tSolvePnP.at<double>(1) * 100<< ";" << tSolvePnP.at<double>(2) * 100<< ";"
-    	             << rSolvePnP.at<double>(0) * 100 << ";" << rSolvePnP.at<double>(1) * 100<< ";" << rSolvePnP.at<double>(2) * 100<< std::endl;
+    	             << rSolvePnP.at<double>(0)  << ";" << rSolvePnP.at<double>(1)  << ";" << rSolvePnP.at<double>(2) << std::endl;
 
     	cv::Mat tRansac = ePose2.getTvec();
     	cv::Mat rRansac = ePose2.getRvec();
-    	fileRansac << tRansac.at<double>(0) * 100<< ";" << tRansac.at<double>(1) * 100<< ";" << tRansac.at<double>(2) * 100<< ";"
-               << rRansac.at<double>(0) * 100<< ";" << rRansac.at<double>(1) * 100<< ";" << rRansac.at<double>(2) * 100<< std::endl;
+    	fileRansac << tRansac.at<double>(0) * -100<< ";" << tRansac.at<double>(1) * -100<< ";" << tRansac.at<double>(2) * -100<< ";"
+               << rRansac.at<double>(0) << ";" << rRansac.at<double>(1) << ";" << (rRansac.at<double>(2) - 3.14) << std::endl;
 
 
 		// Print Error between solvePnP and own Ransac
@@ -428,7 +428,7 @@ int main(){
     	cv::Mat tError = ePose.getTvec() - ePose2.getTvec();
     	cv::Mat rError = ePose.getRvec() - ePose2.getRvec();
     	file << tError.at<double>(0) * 100<< ";" << tError.at<double>(1) * 100<< ";" << tError.at<double>(2) * 100<< ";"
-    	     << rError.at<double>(0) * 100<< ";" << rError.at<double>(1) * 100<< ";" << rError.at<double>(2) * 100<< std::endl;
+    	     << rError.at<double>(0) << ";" << rError.at<double>(1) << ";" << rError.at<double>(2) << std::endl;
 	}
 	// Release the video capture
 	video.release();
