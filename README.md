@@ -20,7 +20,7 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
 - prog -> Ausführbare Datei (chmod +x prog)
 
 - output
-    - graph_solvePnP.png -> Visualisierung vom Programmablauf mit 1000 Iterationen
+    - graph_solvePnP.png -> Visualisierung vom Programmablauf mit solvePnP
     - graph_solvePnP.xlsx -> Excel Tabelle vom Programmablauf mit solvePnP
     - graph_RANSAC_100.png -> Visualisierung vom Programmablauf mit 100 Iterationen bei RANSAC
     - graph_RANSAC_100.xlsx -> Excel Tabelle vom Programmablauf mit 100 Iterationen bei RANSAC
@@ -28,8 +28,8 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
     - graph_RANSAC_1000.xlsx -> Excel Tabelle vom Programmablauf mit 1000 Iterationen bei RANSAC
     - graph_error_100.png -> Visualisierung des Fehlers von RANSAC zu solvePnP bei 100 Iterationen
     - graph_error_100.xlsx -> Excel Tabelle des Fehlers von RANSAC zu solvePnP bei 100 Iterationen
-    - graph_error_1000.png -> Visualisierung des Fehlers von RANSAC zu solvePnP bei 100 Iterationen
-    - graph_error_1000.xlsx -> Excel Tabelle des Fehlers von RANSAC zu solvePnP bei 100 Iterationen
+    - graph_error_1000.png -> Visualisierung des Fehlers von RANSAC zu solvePnP bei 1000 Iterationen
+    - graph_error_1000.xlsx -> Excel Tabelle des Fehlers von RANSAC zu solvePnP bei 1000 Iterationen
     - video_output.mp4 -> Beispielablauf für das Programm
 
 ## Ausführen des Programms
