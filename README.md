@@ -34,9 +34,9 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
 
 ## Ausführen des Programms
 
-Um das Programm zu starten, muss es zuerst im Root kompilliert 
+Um das Programm zu starten, muss es zuerst im Root kompilliert werden mit 
 `make` 
-Anschließend kann es ausgeführt werden
+Anschließend kann es ausgeführt werden mit 
 `./prog`. 
 
 Ein Beispiel des Ablaufs wird im output Ordner bei video_output.mp4 gezeigt
