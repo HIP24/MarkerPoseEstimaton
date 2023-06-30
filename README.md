@@ -13,6 +13,11 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
     - camera_params.yaml -> Intrinsische Kameraparameter
     - video.mp4 -> Video, das im Program verarbeitet wird
 
+- output
+    - activeSet_XYZ.csv -> Abmessungen der Objekte
+    - camera_params.yaml -> Intrinsische Kameraparameter
+    - video.mp4 -> Video, das im Program verarbeitet wird
+
 - makefile -> Makefile für das Projekt
 
 - markerPoseEstimation -> Das Programm
