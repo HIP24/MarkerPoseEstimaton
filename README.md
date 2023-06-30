@@ -35,7 +35,7 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
 ## Ausführen des Programms
 
 Um das Programm zu starten, muss es zuerst im Root kompilliert werden mit 
-`make` 
+`make`.
 Anschließend kann es ausgeführt werden mit 
 `./prog`. 
 
