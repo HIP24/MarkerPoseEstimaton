@@ -143,37 +143,41 @@ class poseEstimateRansac{
 				std::cout << "Insufficient number of points to compute homography!" << std::endl;
 				return false;
 			}
-
+			// because z shouldn't be zero
+			double z_value = 1;
+			// Normalize image points
+			std::vector<cv::Point2f> normalizedImagePoints;
+			cv::undistortPoints(imagePoints, normalizedImagePoints, cameraMatrix_, distCoeffs_);
 			// Construct the matrix A
 			cv::Mat A(2 * objectPoints.size(), 9, CV_64F);
 			for (size_t i = 0; i < objectPoints.size(); i++){
 				const cv::Point3f &X = objectPoints[i];
-				const cv::Point2f &x = imagePoints[i];
+				const cv::Point2f &x = normalizedImagePoints[i];
 
 				A.at<double>(2 * i, 0) = -X.x;
 				A.at<double>(2 * i, 1) = -X.y;
-				A.at<double>(2 * i, 2) = -1;
+				A.at<double>(2 * i, 2) = -z_value;
 				A.at<double>(2 * i, 3) = 0;
 				A.at<double>(2 * i, 4) = 0;
 				A.at<double>(2 * i, 5) = 0;
 				A.at<double>(2 * i, 6) = x.x * X.x;
 				A.at<double>(2 * i, 7) = x.x * X.y;
-				A.at<double>(2 * i, 8) = x.x;
+				A.at<double>(2 * i, 8) = x.x*z_value;
 
 				A.at<double>(2 * i + 1, 0) = 0;
 				A.at<double>(2 * i + 1, 1) = 0;
 				A.at<double>(2 * i + 1, 2) = 0;
 				A.at<double>(2 * i + 1, 3) = -X.x;
 				A.at<double>(2 * i + 1, 4) = -X.y;
-				A.at<double>(2 * i + 1, 5) = -1;
+				A.at<double>(2 * i + 1, 5) = -z_value;
 				A.at<double>(2 * i + 1, 6) = x.y * X.x;
 				A.at<double>(2 * i + 1, 7) = x.y * X.y;
-				A.at<double>(2 * i + 1, 8) = x.y;
+				A.at<double>(2 * i + 1, 8) = x.y*z_value;
 			}
 
 			// Perform singular value decomposition (SVD) on matrix A
 			cv::Mat u, w, vt;
-			cv::SVD::compute(A, w, u, vt);
+			cv::SVD::compute(A, w, u, vt, cv::SVD::FULL_UV);
 			
 			// Extract the column of V corresponding to the smallest singular value
 			cv::Mat h = vt.row(vt.rows - 1).t();
@@ -189,14 +193,13 @@ class poseEstimateRansac{
 				}
 			}
 			// Compute the camera pose from the homography
-			cv::Mat Kinv = cameraMatrix_.inv();
 			cv::Mat h1 = H.col(0);
 			cv::Mat h2 = H.col(1);
 			cv::Mat h3 = H.col(2);
-			cv::Mat r1 = Kinv * h1;
-			cv::Mat r2 = Kinv * h2;
+			cv::Mat r1 = h1;
+			cv::Mat r2 = h2;
 			cv::Mat r3 = r1.cross(r2);
-			cv::Mat t = Kinv * h3;
+			cv::Mat t = h3;
 			double norm1 = cv::norm(r1);
 			double norm2 = cv::norm(r2);
 			double tnorm = (norm1 + norm2) / 2.0;
