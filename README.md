@@ -17,7 +17,7 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
 
 - markerPoseEstimation -> Das Programm
 
-- prog -> ausführbare Datei (chmod +x prog)
+- prog -> Ausführbare Datei (chmod +x prog)
 
 - output
     - graph_solvePnP.png -> Visualisierung vom Programmablauf mit 1000 Iterationen
