@@ -15,7 +15,7 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
 
 - makefile -> Makefile für das Projekt
 
-- markerPoseEstimation -> Das Programm
+- markerPoseEstimation.cpp -> Das Programm
 
 - prog -> Ausführbare Datei (chmod +x prog)
 
