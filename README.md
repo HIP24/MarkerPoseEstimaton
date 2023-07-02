@@ -24,6 +24,8 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
     - graph_solvePnP.xlsx -> Excel Tabelle vom Programmablauf mit solvePnP
     - graph_RANSAC_100_8.png -> Visualisierung vom Programmablauf mit 100 Iterationen und 8 Reprojektionsfehlern bei RANSAC
     - graph_RANSAC_100_8.xlsx -> Excel Tabelle vom Programmablauf mit 100 Iterationen und 8 Reprojektionsfehlern bei RANSAC
+    - graph_RANSAC_100_8_adjusted.png -> Visualisierung vom Programmablauf mit 100 Iterationen und 8 Reprojektionsfehlern bei RANSAC mit angepassten Werten
+    - graph_RANSAC_100_8_adjusted.xlsx -> Excel Tabelle vom Programmablauf mit 100 Iterationen und 8 Reprojektionsfehlern bei RANSAC mit angepassten Werten
     - graph_RANSAC_1000_2.png -> Visualisierung vom Programmablauf mit 1000 Iterationen und 2 Reprojektionsfehlern bei RANSAC
     - graph_RANSAC_1000_2.xlsx -> Excel Tabelle vom Programmablauf mit 1000 Iterationen und 2 Reprojektionsfehlern bei RANSAC
     - graph_error_100_8.png -> Visualisierung des Fehlers von RANSAC zu solvePnP bei 100 Iterationen und 8 Reprojektionsfehlern
