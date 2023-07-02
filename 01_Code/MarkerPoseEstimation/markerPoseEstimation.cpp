@@ -90,7 +90,7 @@ class poseEstimateSolvePnP{
 			cv::line(frame, projectedPoints[0], projectedPoints[2], cv::Scalar(0, 255, 0), 3);
 			cv::line(frame, projectedPoints[0], projectedPoints[3], cv::Scalar(255, 0, 0), 3);
 			cv::resize(frame, frame, cv::Size(frame.cols/1.2, frame.rows/1.2));
-			cv::imshow("CheesboardCornersolvePnP", frame);
+			cv::imshow("CheesboardCornerSolvePnP", frame);
 		}
 
 	private:
@@ -367,7 +367,7 @@ int main(){
 	// Open the CSV file for writing
 	std::ofstream file("data/Error.csv");
 	std::ofstream fileSolvePnP("data/SolvePnP.csv");
-	std::ofstream fileRansac("data/Ransac.csv");
+	std::ofstream fileRansac("data/RANSAC.csv");
 
 	// Write the headers
 	fileSolvePnP << "tvec_x;tvec_y;tvec_z;rvec_x;rvec_y;rvec_z" << std::endl;
@@ -419,7 +419,7 @@ int main(){
     	cv::Mat tRansac = ePose2.getTvec();
     	cv::Mat rRansac = ePose2.getRvec();
     	fileRansac << tRansac.at<double>(0) * -100<< ";" << tRansac.at<double>(1) * -100<< ";" << tRansac.at<double>(2) * -100<< ";"
-               << rRansac.at<double>(0) << ";" << rRansac.at<double>(1) << ";" << (rRansac.at<double>(2) - 3.14) << std::endl;
+               << rRansac.at<double>(0) << ";" << rRansac.at<double>(1) * (-1) << ";" << (rRansac.at<double>(2) - 3.14) *(-1) << std::endl;
 
 
 		// Print Error between solvePnP and own Ransac
