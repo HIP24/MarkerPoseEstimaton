@@ -1,6 +1,6 @@
 # MarkerPoseEstimaton
 
-## Prerequisites
+## Voraussetzungen
 
 OpenCV version: 3.4.20
 
