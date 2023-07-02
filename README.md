@@ -22,14 +22,14 @@ Die Abgabe "MarkerPoseEstimation" besteht aus folgenden Teilen
 - output
     - graph_solvePnP.png -> Visualisierung vom Programmablauf mit solvePnP
     - graph_solvePnP.xlsx -> Excel Tabelle vom Programmablauf mit solvePnP
-    - graph_RANSAC_100.png -> Visualisierung vom Programmablauf mit 100 Iterationen bei RANSAC
-    - graph_RANSAC_100.xlsx -> Excel Tabelle vom Programmablauf mit 100 Iterationen bei RANSAC
-    - graph_RANSAC_1000.png -> Visualisierung vom Programmablauf mit 1000 Iterationen bei RANSAC
-    - graph_RANSAC_1000.xlsx -> Excel Tabelle vom Programmablauf mit 1000 Iterationen bei RANSAC
-    - graph_error_100.png -> Visualisierung des Fehlers von RANSAC zu solvePnP bei 100 Iterationen
-    - graph_error_100.xlsx -> Excel Tabelle des Fehlers von RANSAC zu solvePnP bei 100 Iterationen
-    - graph_error_1000.png -> Visualisierung des Fehlers von RANSAC zu solvePnP bei 1000 Iterationen
-    - graph_error_1000.xlsx -> Excel Tabelle des Fehlers von RANSAC zu solvePnP bei 1000 Iterationen
+    - graph_RANSAC_100_8.png -> Visualisierung vom Programmablauf mit 100 Iterationen und 8 Reprojektionsfehlern bei RANSAC
+    - graph_RANSAC_100_8.xlsx -> Excel Tabelle vom Programmablauf mit 100 Iterationen und 8 Reprojektionsfehlern bei RANSAC
+    - graph_RANSAC_1000_2.png -> Visualisierung vom Programmablauf mit 1000 Iterationen und 2 Reprojektionsfehlern bei RANSAC
+    - graph_RANSAC_1000_2.xlsx -> Excel Tabelle vom Programmablauf mit 1000 Iterationen und 2 Reprojektionsfehlern bei RANSAC
+    - graph_error_100_8.png -> Visualisierung des Fehlers von RANSAC zu solvePnP bei 100 Iterationen und 8 Reprojektionsfehlern
+    - graph_error_100_8.xlsx -> Excel Tabelle des Fehlers von RANSAC zu solvePnP bei 100 Iterationen und 8 Reprojektionsfehlern
+    - graph_error_1000_2.png -> Visualisierung des Fehlers von RANSAC zu solvePnP bei 1000 Iterationen und 2 Reprojektionsfehlern
+    - graph_error_1000_2.xlsx -> Excel Tabelle des Fehlers von RANSAC zu solvePnP bei 1000 Iterationen und 2 Reprojektionsfehlern
     - video_output.mp4 -> Beispielablauf für das Programm
 
 ## Ausführen des Programms
@@ -42,7 +42,7 @@ Ein Beispiel des Ablaufs wird im output Ordner bei video_output.mp4 gezeigt.
 
 Nach dem Ausführen des Programms werden drei neue Excel Dateien erzeugt
 - solvePnP.csv -> tvec und rvec Werte von solveP
-- Ransac.csv -> tvec und rvec Werte von Ransac
-- Error.csv -> Unterschied der tvec und rvec Werte von solvePnP und Ransac
+- RANSAC.csv -> tvec und rvec Werte von RANSAC
+- Error.csv -> Unterschied der tvec und rvec Werte von solvePnP und RANSAC
 
 
