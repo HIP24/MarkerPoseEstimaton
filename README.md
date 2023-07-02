@@ -41,7 +41,7 @@ Ein Beispiel des Ablaufs wird im output Ordner bei video_output.mp4 gezeigt.
 ## Nach dem Ausführen des Programms 
 
 Nach dem Ausführen des Programms werden drei neue Excel Dateien erzeugt
-- solvePnP.csv -> tvec und rvec Werte von solveP
+- SolvePnP.csv -> tvec und rvec Werte von solveP
 - RANSAC.csv -> tvec und rvec Werte von RANSAC
 - Error.csv -> Unterschied der tvec und rvec Werte von solvePnP und RANSAC
 
