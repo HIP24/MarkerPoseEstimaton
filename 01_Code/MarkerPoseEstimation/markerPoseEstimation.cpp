@@ -394,7 +394,7 @@ int main(){
 			ePose.displayTransRot(out);
 		}else{
 			cv::resize(out, out, cv::Size(out.cols/1.2, out.rows/1.2));
-			cv::imshow("CheesboardCornersolvePnP", out);
+			cv::imshow("CheesboardCornerSolvePnP", out);
 		}
 		// FOR Ransac
 		ePose2.findChessboardCorners(vidImg);
